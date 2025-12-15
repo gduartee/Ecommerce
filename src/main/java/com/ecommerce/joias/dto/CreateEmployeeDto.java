@@ -1,0 +1,20 @@
+package com.ecommerce.joias.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CreateEmployeeDto(
+        @NotBlank(message = "Nome obrigatório")
+        String name,
+
+        @NotBlank(message = "E-mail obrigatório")
+        String email,
+
+        @NotBlank(message = "Senha obrigatória")
+        @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
+        String password,
+
+        @NotBlank(message = "ROLE obrigatório")
+        String role
+) {
+}
