@@ -20,13 +20,13 @@ public class User {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "phoneNumber")
+    @Column(name = "phoneNumber", unique = true)
     private String phoneNumber;
 
-    @Column(name = "cpf")
+    @Column(name = "cpf", unique = true)
     private String cpf;
 
     @Column(name = "password")

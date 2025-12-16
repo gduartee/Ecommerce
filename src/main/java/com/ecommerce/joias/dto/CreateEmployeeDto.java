@@ -1,6 +1,7 @@
 package com.ecommerce.joias.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record CreateEmployeeDto(
@@ -15,6 +16,7 @@ public record CreateEmployeeDto(
         String password,
 
         @NotBlank(message = "ROLE obrigatório")
+        @Pattern(regexp = "MANAGER|EMPLOYEE", message = "A role deve ser apenas 'MANAGER' ou 'EMPLOYEE'")
         String role
 ) {
 }
