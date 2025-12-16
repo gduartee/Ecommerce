@@ -1,6 +1,7 @@
 package com.ecommerce.joias.controller;
 
 import com.ecommerce.joias.dto.CreateUserDto;
+import com.ecommerce.joias.dto.UpdateUserDto;
 import com.ecommerce.joias.entity.User;
 import com.ecommerce.joias.service.UserService;
 import jakarta.validation.Valid;
@@ -30,7 +31,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserById(@PathVariable("userId") String userId){
-        var user = userService.getUserById(userId);
+        var user = userService.getUserById(UUID.fromString(userId));
 
         return ResponseEntity.ok(user);
     }
@@ -40,6 +41,20 @@ public class UserController {
         var users = userService.listUsers();
 
         return ResponseEntity.ok(users);
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<Void> updateUserByid(@PathVariable("userId") String userId,
+                                               @RequestBody UpdateUserDto updateUserDto){
+        userService.updateUserById(UUID.fromString(userId), updateUserDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable ("userId") String userId){
+        userService.deleteUserById(UUID.fromString(userId));
+        return ResponseEntity.noContent().build();
     }
 
 }

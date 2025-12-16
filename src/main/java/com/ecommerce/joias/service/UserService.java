@@ -1,6 +1,7 @@
 package com.ecommerce.joias.service;
 
 import com.ecommerce.joias.dto.CreateUserDto;
+import com.ecommerce.joias.dto.UpdateUserDto;
 import com.ecommerce.joias.entity.User;
 import com.ecommerce.joias.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,20 +15,20 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UUID createUser(CreateUserDto createUserDto){
+    public UUID createUser(CreateUserDto createUserDto) {
 
-        if(userRepository.existsByEmail(createUserDto.email()))
+        if (userRepository.existsByEmail(createUserDto.email()))
             throw new RuntimeException("Este e-mail já está cadastrado.");
 
-        if(userRepository.existsByPhoneNumber(createUserDto.phoneNumber()))
+        if (userRepository.existsByPhoneNumber(createUserDto.phoneNumber()))
             throw new RuntimeException("Este telefone já está cadastrado.");
 
-        if(userRepository.existsByCpf(createUserDto.cpf()))
+        if (userRepository.existsByCpf(createUserDto.cpf()))
             throw new RuntimeException("Este CPF já está cadastrado.");
 
         // DTO -> ENTITY
@@ -43,13 +44,41 @@ public class UserService {
         return userSaved.getUserId();
     }
 
-    public User getUserById(String userId){
-        return userRepository.findById(UUID.fromString(userId)).orElseThrow(() -> new RuntimeException(("Usuário não encontrado")));
+    public User getUserById(UUID userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException(("Usuário não encontrado")));
     }
 
-    public List<User> listUsers(){
+    public List<User> listUsers() {
         return userRepository.findAll();
     }
 
-    
+    public void deleteUserById(UUID userId) {
+        var userExists = userRepository.existsById(userId);
+
+        if (!userExists)
+            throw new RuntimeException("Usuário não encontrado para exclusão");
+
+        userRepository.deleteById(userId);
+    }
+
+    public void updateUserById(UUID userId, UpdateUserDto updateUserDto) {
+        var userEntity = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (!userEntity.getEmail().equals(updateUserDto.email()) && userRepository.existsByEmail(updateUserDto.email()))
+            throw new RuntimeException("Este e-mail já está em uso por outro usuário.");
+
+        if (!userEntity.getPhoneNumber().equals(updateUserDto.phoneNumber()) && userRepository.existsByPhoneNumber(updateUserDto.phoneNumber()))
+            throw new RuntimeException("Este número de telefone já está em uso por outro usuário.");
+
+        if (updateUserDto.name() != null)
+            userEntity.setName(updateUserDto.name());
+
+        if (updateUserDto.email() != null)
+            userEntity.setEmail(updateUserDto.email());
+
+        if (updateUserDto.phoneNumber() != null)
+            userEntity.setPhoneNumber(updateUserDto.phoneNumber());
+
+        userRepository.save(userEntity);
+    }
 }
