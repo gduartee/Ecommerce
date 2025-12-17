@@ -1,5 +1,6 @@
 package com.ecommerce.joias.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class Product {
     private String material;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ProductVariant> variants = new ArrayList<>();
 
     public Product() {
