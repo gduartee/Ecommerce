@@ -1,5 +1,6 @@
 package com.ecommerce.joias.controller;
 
+import com.ecommerce.joias.dto.ApiResponse;
 import com.ecommerce.joias.dto.CategoryDto;
 import com.ecommerce.joias.dto.CategoryResponseDto;
 import com.ecommerce.joias.entity.Category;
@@ -37,7 +38,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> listCategories(){
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> listCategories(){
         var categories = categoryService.listCategories();
 
         return ResponseEntity.ok(categories);

@@ -1,5 +1,6 @@
 package com.ecommerce.joias.service;
 
+import com.ecommerce.joias.dto.ApiResponse;
 import com.ecommerce.joias.dto.CategoryDto;
 import com.ecommerce.joias.dto.CategoryResponseDto;
 import com.ecommerce.joias.dto.ProductShortDto;
@@ -47,8 +48,27 @@ public class CategoryService {
        );
     }
 
-    public List<Category> listCategories(){
-        return categoryRepository.findAll();
+    public ApiResponse<CategoryResponseDto> listCategories(){
+        var categories = categoryRepository.findAll();
+
+        var categoriesDto = categories.stream().map(
+                category -> new CategoryResponseDto(
+                        category.getCategoryId(),
+                        category.getName(),
+                        category.getProducts().stream().map(
+                                product -> new ProductShortDto(
+                                        product.getProductId(),
+                                        product.getName(),
+                                        product.getDescription()
+                                )
+                        ).toList()
+                )
+        ).toList();
+
+        return new ApiResponse<>(
+                categoriesDto,
+                categoriesDto.size()
+        );
     }
 
     public void updateCategoryById(Integer categoryId, CategoryDto updateCategoryDto){

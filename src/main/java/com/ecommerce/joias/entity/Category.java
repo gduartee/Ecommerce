@@ -18,7 +18,6 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category")
-    @JsonIgnore
     private List<Product> products = new ArrayList<>();
 
     public Category(){

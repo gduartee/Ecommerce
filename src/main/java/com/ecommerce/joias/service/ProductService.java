@@ -1,6 +1,5 @@
 package com.ecommerce.joias.service;
 
-import com.ecommerce.joias.dto.CategoryDto;
 import com.ecommerce.joias.dto.CreateProductDto;
 import com.ecommerce.joias.dto.ProductResponseDto;
 import com.ecommerce.joias.dto.ProductVariantResponseDto;
@@ -74,5 +73,11 @@ public class ProductService {
                 categoryInfo,
                 productVariantsDto
         );
+    }
+
+    public void deleteProductById(Integer productId){
+        productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Produto com esse id não encontrado"));
+
+        productRepository.deleteById(productId);
     }
 }

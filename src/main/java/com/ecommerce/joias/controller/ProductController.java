@@ -6,10 +6,7 @@ import com.ecommerce.joias.entity.Product;
 import com.ecommerce.joias.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -29,5 +26,19 @@ public class ProductController {
         var location = URI.create("/products/" + product.productId());
 
         return ResponseEntity.created(location).body(product);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductResponseDto> getProductById(@PathVariable("productId") Integer productId){
+        var product = productService.getProductById(productId);
+
+        return ResponseEntity.ok(product);
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProductById(@PathVariable("productId") Integer productId){
+        productService.deleteProductById(productId);
+
+        return ResponseEntity.noContent().build();
     }
 }
