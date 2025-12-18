@@ -15,7 +15,6 @@ public class ProductVariant {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    @JsonBackReference
     private Product product;
 
     @Column(name = "size")

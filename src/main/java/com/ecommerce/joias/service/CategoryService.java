@@ -1,6 +1,8 @@
 package com.ecommerce.joias.service;
 
 import com.ecommerce.joias.dto.CategoryDto;
+import com.ecommerce.joias.dto.CategoryResponseDto;
+import com.ecommerce.joias.dto.ProductShortDto;
 import com.ecommerce.joias.entity.Category;
 import com.ecommerce.joias.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -28,9 +30,21 @@ public class CategoryService {
         return categoryRepository.save(categoryEntity);
     }
 
-    public Category getCategoryById(Integer categoryId)
+    public CategoryResponseDto getCategoryById(Integer categoryId)
     {
-        return categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+       var category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
+       var productList = category.getProducts().stream().map(product -> new ProductShortDto(
+               product.getProductId(),
+               product.getName(),
+               product.getDescription()
+       )).toList();
+
+       return new CategoryResponseDto(
+               category.getCategoryId(),
+               category.getName(),
+               productList
+       );
     }
 
     public List<Category> listCategories(){

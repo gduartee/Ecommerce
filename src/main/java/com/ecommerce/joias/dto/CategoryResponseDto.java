@@ -1,4 +1,10 @@
 package com.ecommerce.joias.dto;
 
-public record CategoryResponseDto() {
+import java.util.List;
+
+public record CategoryResponseDto(
+        Integer categoryId,
+        String name,
+        List<ProductShortDto> products
+) {
 }

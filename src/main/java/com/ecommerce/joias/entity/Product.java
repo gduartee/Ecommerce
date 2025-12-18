@@ -28,7 +28,6 @@ public class Product {
     private String material;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    @JsonManagedReference
     private List<ProductVariant> variants = new ArrayList<>();
 
     public Product() {

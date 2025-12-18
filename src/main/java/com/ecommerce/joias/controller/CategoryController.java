@@ -1,6 +1,7 @@
 package com.ecommerce.joias.controller;
 
 import com.ecommerce.joias.dto.CategoryDto;
+import com.ecommerce.joias.dto.CategoryResponseDto;
 import com.ecommerce.joias.entity.Category;
 import com.ecommerce.joias.service.CategoryService;
 import jakarta.validation.Valid;
@@ -29,7 +30,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable("categoryId") Integer categoryId){
+    public ResponseEntity<CategoryResponseDto> getCategoryById(@PathVariable("categoryId") Integer categoryId){
         var category = categoryService.getCategoryById(categoryId);
 
         return ResponseEntity.ok(category);

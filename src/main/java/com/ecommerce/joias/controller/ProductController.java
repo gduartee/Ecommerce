@@ -1,6 +1,7 @@
 package com.ecommerce.joias.controller;
 
 import com.ecommerce.joias.dto.CreateProductDto;
+import com.ecommerce.joias.dto.ProductResponseDto;
 import com.ecommerce.joias.entity.Product;
 import com.ecommerce.joias.service.ProductService;
 import jakarta.validation.Valid;
@@ -22,10 +23,10 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody @Valid CreateProductDto createProductDto){
+    public ResponseEntity<ProductResponseDto> createProduct(@RequestBody @Valid CreateProductDto createProductDto){
         var product = productService.createProduct(createProductDto);
 
-        var location = URI.create("/products/" + product.getProductId());
+        var location = URI.create("/products/" + product.productId());
 
         return ResponseEntity.created(location).body(product);
     }
