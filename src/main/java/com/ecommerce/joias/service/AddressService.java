@@ -71,6 +71,21 @@ public class AddressService {
     public void updateAddressById(Integer addressId, UpdateAddressDto updateAddressDto){
         var addressEntity = addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
 
-       
+        if(updateAddressDto.cep() != null)
+            addressEntity.setCep(updateAddressDto.cep());
+
+        if(updateAddressDto.street() != null)
+            addressEntity.setStreet(updateAddressDto.street());
+
+        if(updateAddressDto.num() != null)
+            addressEntity.setNum(updateAddressDto.num());
+
+        addressRepository.save(addressEntity);
+    }
+
+    public void deleteAddressById(Integer addressId){
+        addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+
+        addressRepository.deleteById(addressId);
     }
 }
