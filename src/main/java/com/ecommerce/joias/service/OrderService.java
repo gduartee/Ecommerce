@@ -1,7 +1,9 @@
 package com.ecommerce.joias.service;
 
 import com.ecommerce.joias.dto.create.CreateOrderDto;
+import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.OrderResponseDto;
+import com.ecommerce.joias.dto.update.UpdateOrderDto;
 import com.ecommerce.joias.entity.Order;
 import com.ecommerce.joias.entity.OrderItem;
 import com.ecommerce.joias.entity.OrderStatus;
@@ -84,6 +86,7 @@ public class OrderService {
                 savedOrder.getCreatedAt(),
                 savedOrder.getTotalPrice(),
                 savedOrder.getStatus(),
+                savedOrder.getTrackingCode(),
                 savedOrder.getOrderItems().stream().map(item -> new OrderResponseDto.OrderItemResponseDto(
                         item.getOrderItemId(),
                         item.getProductVariant().getSku(),
@@ -92,5 +95,76 @@ public class OrderService {
                         item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
                 )).toList()
         );
+    }
+
+    public OrderResponseDto getOrderById(Integer orderId){
+        var orderEntity = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+
+        return new OrderResponseDto(
+          orderEntity.getOrderId(),
+          orderEntity.getCreatedAt(),
+          orderEntity.getTotalPrice(),
+          orderEntity.getStatus(),
+          orderEntity.getTrackingCode(),
+          orderEntity.getOrderItems().stream().map(orderItem -> new OrderResponseDto.OrderItemResponseDto(
+                  orderItem.getOrderItemId(),
+                  orderItem.getProductVariant().getSku(),
+                  orderItem.getQuantity(),
+                  orderItem.getUnitPrice(),
+                  orderItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()))
+          )).toList()
+        );
+    }
+
+    public ApiResponse<OrderResponseDto> listOrders(){
+        var orders = orderRepository.findAll();
+
+        var ordersDto = orders.stream().map(order -> new OrderResponseDto(
+                order.getOrderId(),
+                order.getCreatedAt(),
+                order.getTotalPrice(),
+                order.getStatus(),
+                order.getTrackingCode(),
+                order.getOrderItems().stream().map(orderItem -> new OrderResponseDto.OrderItemResponseDto(
+                        orderItem.getOrderItemId(),
+                        orderItem.getProductVariant().getSku(),
+                        orderItem.getQuantity(),
+                        orderItem.getUnitPrice(),
+                        orderItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()))
+                )).toList()
+        )).toList();
+
+        return new ApiResponse<>(
+                ordersDto,
+                ordersDto.size()
+        );
+    }
+
+    public void updateOrderById(Integer orderId, UpdateOrderDto updateOrderDto){
+        var order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+
+        if(updateOrderDto.trackingCode() != null && !updateOrderDto.trackingCode().isBlank())
+            order.setTrackingCode(updateOrderDto.trackingCode());
+
+        if(updateOrderDto.status() == OrderStatus.CANCELED && order.getStatus() != OrderStatus.CANCELED)
+            devolverEstoque(order);
+
+        if(updateOrderDto.status() != null)
+            order.setStatus(updateOrderDto.status());
+
+        orderRepository.save(order);
+    }
+
+    public void deleteOrderById(Integer orderId){
+        orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+
+        orderRepository.deleteById(orderId);
+    }
+
+    private void devolverEstoque(Order order){
+        for(OrderItem item : order.getOrderItems()){
+            var productVariant = item.getProductVariant();
+            productVariant.setStockQuantity(productVariant.getStockQuantity() + item.getQuantity());
+        }
     }
 }

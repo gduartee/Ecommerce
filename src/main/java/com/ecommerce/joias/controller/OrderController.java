@@ -1,7 +1,9 @@
 package com.ecommerce.joias.controller;
 
 import com.ecommerce.joias.dto.create.CreateOrderDto;
+import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.OrderResponseDto;
+import com.ecommerce.joias.dto.update.UpdateOrderDto;
 import com.ecommerce.joias.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,5 +28,33 @@ public class OrderController {
         URI location = URI.create("/orders/" + orderDto.orderId());
 
         return ResponseEntity.created(location).body(orderDto);
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable("orderId") Integer orderId){
+        var orderDto = orderService.getOrderById(orderId);
+
+        return ResponseEntity.ok(orderDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<OrderResponseDto>> listOrders(){
+        var ordersDto = orderService.listOrders();
+
+        return ResponseEntity.ok(ordersDto);
+    }
+
+    @PutMapping("/{orderId}")
+    public ResponseEntity<Void> updateOrderById(@PathVariable("orderId") Integer orderId, @RequestBody UpdateOrderDto updateOrderDto){
+        orderService.updateOrderById(orderId, updateOrderDto);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> deleteOrderById(@PathVariable("orderId") Integer orderId){
+        orderService.deleteOrderById(orderId);
+
+        return ResponseEntity.noContent().build();
     }
 }

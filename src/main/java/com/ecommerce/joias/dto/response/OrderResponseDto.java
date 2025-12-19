@@ -11,6 +11,7 @@ public record OrderResponseDto(
         LocalDateTime createdAt,
         BigDecimal totalPrice,
         OrderStatus status,
+        String trackingCode,
         List<OrderItemResponseDto> items
 ) {
     public record OrderItemResponseDto(

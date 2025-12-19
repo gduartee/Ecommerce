@@ -42,14 +42,18 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @Column(name = "tracking_code", nullable = true)
+    String trackingCode;
+
     public Order() {
     }
 
-    public Order(User user, Address address, OrderStatus status, BigDecimal totalPrice) {
+    public Order(User user, Address address, OrderStatus status, BigDecimal totalPrice, String trackingCode) {
         this.user = user;
         this.address = address;
         this.status = status;
         this.totalPrice = totalPrice;
+        this.trackingCode = trackingCode;
     }
 
     public Integer getOrderId() {
@@ -119,5 +123,13 @@ public class Order {
     public void addOrderItem(OrderItem orderItem){
         this.orderItems.add(orderItem);
         orderItem.setOrder(this);
+    }
+
+    public String getTrackingCode() {
+        return trackingCode;
+    }
+
+    public void setTrackingCode(String trackingCode) {
+        this.trackingCode = trackingCode;
     }
 }
