@@ -2,6 +2,8 @@ package com.ecommerce.joias.service;
 
 import com.ecommerce.joias.dto.create.CreateAddressDto;
 import com.ecommerce.joias.dto.response.AddressResponseDto;
+import com.ecommerce.joias.dto.response.ApiResponse;
+import com.ecommerce.joias.dto.update.UpdateAddressDto;
 import com.ecommerce.joias.entity.Address;
 import com.ecommerce.joias.repository.AddressRepository;
 import com.ecommerce.joias.repository.UserRepository;
@@ -19,8 +21,8 @@ public class AddressService {
         this.userRepository = userRepository;
     }
 
-    public AddressResponseDto createAddress(UUID userId, CreateAddressDto createAddressDto){
-       var user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    public AddressResponseDto createAddress(UUID userId, CreateAddressDto createAddressDto) {
+        var user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         // DTO -> ENTITY
         var addressEntity = new Address();
@@ -37,5 +39,38 @@ public class AddressService {
                 addressSaved.getStreet(),
                 addressSaved.getNum()
         );
+    }
+
+    public AddressResponseDto getAddressById(Integer addressId){
+        var addressEntity = addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+
+        return new AddressResponseDto(
+                addressEntity.getAddressId(),
+                addressEntity.getCep(),
+                addressEntity.getStreet(),
+                addressEntity.getNum()
+        );
+    }
+
+    public ApiResponse<AddressResponseDto> listAddresses(){
+        var addresses = addressRepository.findAll();
+
+        var addressesDto = addresses.stream().map(address -> new AddressResponseDto(
+                address.getAddressId(),
+                address.getCep(),
+                address.getStreet(),
+                address.getNum()
+        )).toList();
+
+        return new ApiResponse<>(
+                addressesDto,
+                addressesDto.size()
+        );
+    }
+
+    public void updateAddressById(Integer addressId, UpdateAddressDto updateAddressDto){
+        var addressEntity = addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+
+       
     }
 }

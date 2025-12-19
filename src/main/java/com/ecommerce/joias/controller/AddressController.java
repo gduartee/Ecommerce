@@ -2,6 +2,7 @@ package com.ecommerce.joias.controller;
 
 import com.ecommerce.joias.dto.create.CreateAddressDto;
 import com.ecommerce.joias.dto.response.AddressResponseDto;
+import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +27,19 @@ public class AddressController {
         URI location = URI.create("/addresses/" + userId + "/" + addressCreated.addressId());
 
         return ResponseEntity.created(location).body(addressCreated);
+    }
+
+    @GetMapping("/{addressId}")
+    public ResponseEntity<AddressResponseDto> getAddressById(@PathVariable("addressId") Integer addressId){
+        var addressDto = addressService.getAddressById(addressId);
+
+        return ResponseEntity.ok(addressDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<AddressResponseDto>> listAddresses(){
+        var addressesDto = addressService.listAddresses();
+
+        return ResponseEntity.ok(addressesDto);
     }
 }
