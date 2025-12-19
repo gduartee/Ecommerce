@@ -1,0 +1,96 @@
+package com.ecommerce.joias.service;
+
+import com.ecommerce.joias.dto.create.CreateOrderDto;
+import com.ecommerce.joias.dto.response.OrderResponseDto;
+import com.ecommerce.joias.entity.Order;
+import com.ecommerce.joias.entity.OrderItem;
+import com.ecommerce.joias.entity.OrderStatus;
+import com.ecommerce.joias.repository.AddressRepository;
+import com.ecommerce.joias.repository.OrderRepository;
+import com.ecommerce.joias.repository.ProductVariantRepository;
+import com.ecommerce.joias.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.UUID;
+
+@Service
+public class OrderService {
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
+    private final ProductVariantRepository productVariantRepository;
+
+    public OrderService(UserRepository userRepository, OrderRepository orderRepository, AddressRepository addressRepository, ProductVariantRepository productVariantRepository) {
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.addressRepository = addressRepository;
+        this.productVariantRepository = productVariantRepository;
+    }
+
+    @Transactional
+    public OrderResponseDto createOrder(UUID userId, Integer addressId, CreateOrderDto createOrderDto) {
+
+        var user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        var address = addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+
+        if (!address.getUser().getUserId().equals(userId))
+            throw new RuntimeException("Endereço não pertence a este usuário");
+
+        var order = new Order();
+        order.setUser(user);
+        order.setAddress(address);
+        order.setStatus(OrderStatus.WAITING_PAYMENT);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setOrderItems(new ArrayList<>());
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        // Processa itens e estoque
+        for (var itemDto : createOrderDto.items()) {
+            var productVariant = productVariantRepository.findById(itemDto.variantId()).orElseThrow(() -> new RuntimeException("Variante não encontrada"));
+
+            // Valida o estoque
+            if (productVariant.getStockQuantity() < itemDto.quantity())
+                throw new RuntimeException("Estoque insuficiente para o item " + productVariant.getSku());
+
+            // Baixa estoque
+            productVariant.setStockQuantity(productVariant.getStockQuantity() - itemDto.quantity());
+            productVariantRepository.save(productVariant);
+
+            // Cria item
+            var orderItem = new OrderItem();
+            orderItem.setOrder(order);
+            orderItem.setProductVariant(productVariant);
+            orderItem.setQuantity(itemDto.quantity());
+            orderItem.setUnitPrice(productVariant.getPrice()); // Preço histórico
+
+            order.addOrderItem(orderItem);
+
+            // Soma total
+            total = total.add(productVariant.getPrice().multiply(BigDecimal.valueOf(itemDto.quantity())));
+        }
+
+        order.setTotalPrice(total);
+
+        var savedOrder = orderRepository.save(order);
+
+        return new OrderResponseDto(
+                savedOrder.getOrderId(),
+                savedOrder.getCreatedAt(),
+                savedOrder.getTotalPrice(),
+                savedOrder.getStatus(),
+                savedOrder.getOrderItems().stream().map(item -> new OrderResponseDto.OrderItemResponseDto(
+                        item.getOrderItemId(),
+                        item.getProductVariant().getSku(),
+                        item.getQuantity(),
+                        item.getUnitPrice(),
+                        item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+                )).toList()
+        );
+    }
+}

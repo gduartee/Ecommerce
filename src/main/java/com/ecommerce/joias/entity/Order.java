@@ -26,7 +26,7 @@ public class Order {
     private Address address;
 
     @Column(name = "status")
-    private String status;
+    private OrderStatus status;
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;
@@ -45,7 +45,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(User user, Address address, String status, BigDecimal totalPrice) {
+    public Order(User user, Address address, OrderStatus status, BigDecimal totalPrice) {
         this.user = user;
         this.address = address;
         this.status = status;
@@ -76,11 +76,11 @@ public class Order {
         this.address = address;
     }
 
-    public String getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
 
