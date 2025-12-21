@@ -1,6 +1,6 @@
-package com.ecommerce.joias.dto;
+package com.ecommerce.joias.dto.response;
 
-public record ProductShortDto(
+public record ProductShortResponseDto(
         Integer productId,
         String name,
         String description

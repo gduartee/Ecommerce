@@ -3,7 +3,7 @@ package com.ecommerce.joias.service;
 import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.create.CreateCategoryDto;
 import com.ecommerce.joias.dto.response.CategoryResponseDto;
-import com.ecommerce.joias.dto.ProductShortDto;
+import com.ecommerce.joias.dto.response.ProductShortResponseDto;
 import com.ecommerce.joias.dto.response.SubCategoriesResponseDto;
 import com.ecommerce.joias.dto.update.UpdateCategoryDto;
 import com.ecommerce.joias.entity.Category;
@@ -40,7 +40,7 @@ public class CategoryService {
         return new CategoryResponseDto(
                 category.getCategoryId(),
                 category.getName(),
-                category.getProducts().stream().map(product -> new ProductShortDto(
+                category.getProducts().stream().map(product -> new ProductShortResponseDto(
                         product.getProductId(),
                         product.getName(),
                         product.getDescription()
@@ -60,7 +60,7 @@ public class CategoryService {
                         category.getCategoryId(),
                         category.getName(),
                         category.getProducts().stream().map(
-                                product -> new ProductShortDto(
+                                product -> new ProductShortResponseDto(
                                         product.getProductId(),
                                         product.getName(),
                                         product.getDescription()
