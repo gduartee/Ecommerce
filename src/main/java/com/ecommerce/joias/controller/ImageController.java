@@ -1,5 +1,6 @@
 package com.ecommerce.joias.controller;
 
+import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.entity.Image;
 import com.ecommerce.joias.service.ImageService;
@@ -22,12 +23,40 @@ public class ImageController {
     public ResponseEntity<ImageResponseDto> uploadImage(@PathVariable("parentType") String parentType,
                                                         @PathVariable("parentId") Integer parentId,
                                                         @RequestParam("file") MultipartFile file,
-                                                        @RequestParam(value = "isMain", defaultValue = "false") Boolean isMain){
+                                                        @RequestParam(value = "isMain", defaultValue = "false") Boolean isMain) {
 
         var savedImage = imageService.uploadImage(file, parentId, parentType, isMain);
 
         URI location = URI.create("/images/" + savedImage.imageId());
 
         return ResponseEntity.created(location).body(savedImage);
+    }
+
+    @GetMapping("/{imageId}")
+    public ResponseEntity<ImageResponseDto> getImageById(@PathVariable("imageId") Integer imageId) {
+        var imageDto = imageService.getImageById(imageId);
+
+        return ResponseEntity.ok(imageDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<ImageResponseDto>> listImages() {
+        var listImagesDto = imageService.listImages();
+
+        return ResponseEntity.ok(listImagesDto);
+    }
+
+    @GetMapping("/{parentId}/{parentType}")
+    public ResponseEntity<ApiResponse<ImageResponseDto>> findByParentIdAndParentType(@PathVariable("parentId") Integer parentId, @PathVariable("parentType") String parentType) {
+        var imagesDto = imageService.findByParentIdAndParentType(parentId, parentType);
+
+        return ResponseEntity.ok(imagesDto);
+    }
+
+    @DeleteMapping("/{imageId}")
+    public ResponseEntity<Void> deleteImageById(@PathVariable("imageId") Integer imageId){
+        imageService.deleteImageById(imageId);
+
+        return ResponseEntity.noContent().build();
     }
 }

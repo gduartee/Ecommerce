@@ -2,6 +2,7 @@ package com.ecommerce.joias.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.entity.Image;
 import com.ecommerce.joias.repository.ImageRepository;
@@ -24,6 +25,7 @@ public class ImageService {
         this.imageRepository = imageRepository;
     }
 
+    @Transactional
     public ImageResponseDto uploadImage(MultipartFile file, Integer parentId, String parentType, Boolean isMain) {
         try {
             String fileName = parentType + "_" + parentId + "_" + UUID.randomUUID();
@@ -52,12 +54,12 @@ public class ImageService {
             var imageSaved = imageRepository.save(imageEntity);
 
             return new ImageResponseDto(
-              imageSaved.getImageId(),
-              imageSaved.getUrl(),
-              imageSaved.getPublicId(),
-              imageSaved.getParentId(),
-              imageSaved.getParentType(),
-              imageSaved.getMain()
+                    imageSaved.getImageId(),
+                    imageSaved.getUrl(),
+                    imageSaved.getPublicId(),
+                    imageSaved.getParentId(),
+                    imageSaved.getParentType(),
+                    imageSaved.getMain()
             );
 
         } catch (IOException e) {
@@ -65,8 +67,67 @@ public class ImageService {
         }
     }
 
-    // Método auxiliar para gerar nome único se precisar
-    private String generateFileName() {
-        return UUID.randomUUID().toString();
+    public ImageResponseDto getImageById(Integer imageId) {
+        var imageEntity = imageRepository.findById(imageId).orElseThrow(() -> new RuntimeException("Imagem não encontrada"));
+
+        return new ImageResponseDto(
+                imageEntity.getImageId(),
+                imageEntity.getUrl(),
+                imageEntity.getPublicId(),
+                imageEntity.getParentId(),
+                imageEntity.getParentType(),
+                imageEntity.getMain()
+        );
     }
+
+    public ApiResponse<ImageResponseDto> listImages() {
+        var imagesEntity = imageRepository.findAll();
+
+        // Converte as entidades para dto
+        var imagesDto = imagesEntity.stream().map(image -> new ImageResponseDto(
+                image.getImageId(),
+                image.getUrl(),
+                image.getPublicId(),
+                image.getParentId(),
+                image.getParentType(),
+                image.getMain()
+        )).toList();
+
+        return new ApiResponse<>(
+                imagesDto,
+                imagesDto.size()
+        );
+    }
+
+    public ApiResponse<ImageResponseDto> findByParentIdAndParentType(Integer parentId, String parentType) {
+        var imagesEntity = imageRepository.findAllByParentIdAndParentType(parentId, parentType);
+
+        var imagesDto = imagesEntity.stream().map(image -> new ImageResponseDto(
+                image.getImageId(),
+                image.getUrl(),
+                image.getPublicId(),
+                image.getParentId(),
+                image.getParentType(),
+                image.getMain()
+        )).toList();
+
+        return new ApiResponse<>(
+                imagesDto,
+                imagesDto.size()
+        );
+    }
+
+    @Transactional
+    public void deleteImageById(Integer imageId){
+        var image = imageRepository.findById(imageId).orElseThrow(() -> new RuntimeException("Imagem não encontrada"));
+
+        try{
+            cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.emptyMap());
+        } catch (IOException ex){
+            throw new RuntimeException("Erro ao deletar imagem do Cloudinary", ex);
+        }
+
+        imageRepository.deleteById(imageId);
+    }
+
 }
