@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ImageRepository extends JpaRepository<Image, Integer> {
 
-    void deleteByParentIdAndParenType(Integer parentId, String parentType);
+    void deleteByParentIdAndParentType(Integer parentId, String parentType);
 
     List<Image> findAllByParentIdAndParentType(Integer parentId, String parentType);
 }

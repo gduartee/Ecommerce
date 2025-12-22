@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.entity.Image;
 import com.ecommerce.joias.repository.ImageRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
