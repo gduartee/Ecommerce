@@ -107,6 +107,14 @@ public class CategoryService {
     public void deleteCategoryById(Integer categoryId) {
         var categoryEntity = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Não existe nenhuma categoria com esse id."));
 
+        // Se a lista de produtos não estiver vazia, proíbe a deleção
+        if(!categoryEntity.getProducts().isEmpty())
+            throw new RuntimeException("Não é possível deletar esta categoria pois existem produtos vinculados a ela.");
+
+        // Se a lista de subCategorias não estiver vazia, proíbe a deleção
+        if(!categoryEntity.getSubCategories().isEmpty())
+            throw new RuntimeException("Não é possível deletar pois existem subcategorias vinculadas.");
+
         categoryRepository.deleteById(categoryId);
     }
 }

@@ -3,6 +3,7 @@ package com.ecommerce.joias.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,7 +22,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/users").permitAll() // Libera o cadastro de usuários (público)
                         .anyRequest().permitAll() //Por enquanto, libera tudo para facilitar o desenvolvimento
-                );
+                ).cors(Customizer.withDefaults());
 
         return http.build();
     }
