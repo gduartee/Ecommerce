@@ -19,41 +19,44 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<UUID> createUser(@RequestBody @Valid CreateUserDto createUserDto){
+    public ResponseEntity<UUID> createUser(@RequestBody @Valid CreateUserDto createUserDto) {
         UUID userId = userService.createUser(createUserDto);
 
         return ResponseEntity.created(URI.create("/users/" + userId.toString())).body(userId);
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("userId") String userId){
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable("userId") String userId) {
         var user = userService.getUserById(UUID.fromString(userId));
 
         return ResponseEntity.ok(user);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<UserResponseDto>> listUsers(){
-        var users = userService.listUsers();
+    public ResponseEntity<ApiResponse<UserResponseDto>> listUsers(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit
+    ) {
+        var users = userService.listUsers(page, limit);
 
         return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{userId}")
     public ResponseEntity<Void> updateUserByid(@PathVariable("userId") String userId,
-                                               @RequestBody UpdateUserDto updateUserDto){
+                                               @RequestBody UpdateUserDto updateUserDto) {
         userService.updateUserById(UUID.fromString(userId), updateUserDto);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable ("userId") String userId){
+    public ResponseEntity<Void> deleteUserById(@PathVariable("userId") String userId) {
         userService.deleteUserById(UUID.fromString(userId));
         return ResponseEntity.noContent().build();
     }

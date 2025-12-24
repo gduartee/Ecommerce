@@ -8,6 +8,8 @@ import com.ecommerce.joias.dto.response.SubCategoriesResponseDto;
 import com.ecommerce.joias.dto.update.UpdateCategoryDto;
 import com.ecommerce.joias.entity.Category;
 import com.ecommerce.joias.repository.CategoryRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,10 +54,12 @@ public class CategoryService {
         );
     }
 
-    public ApiResponse<CategoryResponseDto> listCategories() {
-        var categories = categoryRepository.findAll();
+    public ApiResponse<CategoryResponseDto> listCategories(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
 
-        var categoriesDto = categories.stream().map(
+        var pageData = categoryRepository.findAll(pageable);
+
+        var categoriesDto = pageData.getContent().stream().map(
                 category -> new CategoryResponseDto(
                         category.getCategoryId(),
                         category.getName(),
@@ -75,7 +79,10 @@ public class CategoryService {
 
         return new ApiResponse<>(
                 categoriesDto,
-                categoriesDto.size()
+                pageData.getTotalElements(),
+                pageData.getTotalPages(),
+                pageData.getNumber(),
+                pageData.getSize()
         );
     }
 
@@ -98,7 +105,7 @@ public class CategoryService {
             }
         } else {
             // Se enviou null, significa que virou categoria raiz
-            categoryEntity.setParent(null)  ;
+            categoryEntity.setParent(null);
         }
 
         categoryRepository.save(categoryEntity);
@@ -108,11 +115,11 @@ public class CategoryService {
         var categoryEntity = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Não existe nenhuma categoria com esse id."));
 
         // Se a lista de produtos não estiver vazia, proíbe a deleção
-        if(!categoryEntity.getProducts().isEmpty())
+        if (!categoryEntity.getProducts().isEmpty())
             throw new RuntimeException("Não é possível deletar esta categoria pois existem produtos vinculados a ela.");
 
         // Se a lista de subCategorias não estiver vazia, proíbe a deleção
-        if(!categoryEntity.getSubCategories().isEmpty())
+        if (!categoryEntity.getSubCategories().isEmpty())
             throw new RuntimeException("Não é possível deletar pois existem subcategorias vinculadas.");
 
         categoryRepository.deleteById(categoryId);

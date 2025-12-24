@@ -17,12 +17,12 @@ public class ProductVariantController {
 
     private final ProductVariantService productVariantService;
 
-    public ProductVariantController(ProductVariantService productVariantService){
+    public ProductVariantController(ProductVariantService productVariantService) {
         this.productVariantService = productVariantService;
     }
 
     @PostMapping
-    public ResponseEntity<ProductVariantResponseDto> createProduct(@RequestBody @Valid CreateProductVariantDto createProductVariantDto){
+    public ResponseEntity<ProductVariantResponseDto> createProduct(@RequestBody @Valid CreateProductVariantDto createProductVariantDto) {
         var productVariantCreated = productVariantService.createProductVariant(createProductVariantDto);
 
         URI location = URI.create("/products/variants/" + productVariantCreated.productVariantId());
@@ -31,28 +31,28 @@ public class ProductVariantController {
     }
 
     @GetMapping("/{productVariantId}")
-    public ResponseEntity<ProductVariantResponseDto> getProductVariantById(@PathVariable("productVariantId") Integer productVariantId){
+    public ResponseEntity<ProductVariantResponseDto> getProductVariantById(@PathVariable("productVariantId") Integer productVariantId) {
         var productVariantDto = productVariantService.getProductVariantById(productVariantId);
 
         return ResponseEntity.ok(productVariantDto);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<ProductVariantResponseDto>> listProductVariants(){
-        var productVariants = productVariantService.listProductVariants();
+    public ResponseEntity<ApiResponse<ProductVariantResponseDto>> listProductVariants(@RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        var productVariants = productVariantService.listProductVariants(page, limit);
 
         return ResponseEntity.ok(productVariants);
     }
 
     @PutMapping("/{productVariantId}")
-    public ResponseEntity<Void> updateProductVariantById(@PathVariable("productVariantId") Integer productVariantId, @RequestBody UpdateProductVariantDto updateProductVariantDto){
+    public ResponseEntity<Void> updateProductVariantById(@PathVariable("productVariantId") Integer productVariantId, @RequestBody UpdateProductVariantDto updateProductVariantDto) {
         productVariantService.updateProductVariantById(productVariantId, updateProductVariantDto);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{productVariantId}")
-    public ResponseEntity<Void> deleteProductVariantById(@PathVariable("productVariantId") Integer productVariantId){
+    public ResponseEntity<Void> deleteProductVariantById(@PathVariable("productVariantId") Integer productVariantId) {
         productVariantService.deleteProductVariantById(productVariantId);
 
         return ResponseEntity.noContent().build();

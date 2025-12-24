@@ -17,12 +17,12 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService){
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
 
     @PostMapping("/user/{userId}/address/{addressId}")
-    public ResponseEntity<OrderResponseDto> createOrder(@PathVariable("userId") UUID userId, @PathVariable("addressId") Integer addressId, @RequestBody CreateOrderDto createOrderDto){
+    public ResponseEntity<OrderResponseDto> createOrder(@PathVariable("userId") UUID userId, @PathVariable("addressId") Integer addressId, @RequestBody CreateOrderDto createOrderDto) {
         var orderDto = orderService.createOrder(userId, addressId, createOrderDto);
 
         URI location = URI.create("/orders/" + orderDto.orderId());
@@ -31,28 +31,28 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable("orderId") Integer orderId){
+    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable("orderId") Integer orderId) {
         var orderDto = orderService.getOrderById(orderId);
 
         return ResponseEntity.ok(orderDto);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<OrderResponseDto>> listOrders(){
-        var ordersDto = orderService.listOrders();
+    public ResponseEntity<ApiResponse<OrderResponseDto>> listOrders(@RequestParam(name = "page", defaultValue = "0") int page, @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        var ordersDto = orderService.listOrders(page, limit);
 
         return ResponseEntity.ok(ordersDto);
     }
 
     @PutMapping("/{orderId}")
-    public ResponseEntity<Void> updateOrderById(@PathVariable("orderId") Integer orderId, @RequestBody UpdateOrderDto updateOrderDto){
+    public ResponseEntity<Void> updateOrderById(@PathVariable("orderId") Integer orderId, @RequestBody UpdateOrderDto updateOrderDto) {
         orderService.updateOrderById(orderId, updateOrderDto);
 
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> deleteOrderById(@PathVariable("orderId") Integer orderId){
+    public ResponseEntity<Void> deleteOrderById(@PathVariable("orderId") Integer orderId) {
         orderService.deleteOrderById(orderId);
 
         return ResponseEntity.noContent().build();

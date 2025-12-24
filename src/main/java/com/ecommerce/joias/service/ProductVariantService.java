@@ -7,6 +7,8 @@ import com.ecommerce.joias.dto.update.UpdateProductVariantDto;
 import com.ecommerce.joias.entity.ProductVariant;
 import com.ecommerce.joias.repository.ProductRepository;
 import com.ecommerce.joias.repository.ProductVariantRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -63,8 +65,12 @@ public class ProductVariantService {
         );
     }
 
-    public ApiResponse<ProductVariantResponseDto> listProductVariants() {
-        var productVariantsDtos = productVariantRepository.findAll().stream().map(productVariant -> new ProductVariantResponseDto(
+    public ApiResponse<ProductVariantResponseDto> listProductVariants(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
+
+        var pageData = productVariantRepository.findAll(pageable);
+
+        var productVariantsDtos = pageData.getContent().stream().map(productVariant -> new ProductVariantResponseDto(
                 productVariant.getProductVariantId(),
                 productVariant.getSize(),
                 productVariant.getSku(),
@@ -75,7 +81,10 @@ public class ProductVariantService {
 
         return new ApiResponse<>(
                 productVariantsDtos,
-                productVariantsDtos.size()
+                pageData.getTotalElements(),
+                pageData.getTotalPages(),
+                pageData.getNumber(),
+                pageData.getSize()
         );
     }
 
@@ -101,13 +110,12 @@ public class ProductVariantService {
             productVariantEntity.setPrice(updateProductVariantDto.price());
         }
 
-        if (updateProductVariantDto.stockQuantity() != null){
-            if(updateProductVariantDto.stockQuantity() < 0)
+        if (updateProductVariantDto.stockQuantity() != null) {
+            if (updateProductVariantDto.stockQuantity() < 0)
                 throw new RuntimeException("O estoque não pode ser negativo");
 
             productVariantEntity.setStockQuantity(updateProductVariantDto.stockQuantity());
         }
-
 
 
         if (updateProductVariantDto.weightGrams() != null) {

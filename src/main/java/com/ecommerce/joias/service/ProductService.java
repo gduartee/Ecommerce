@@ -8,7 +8,10 @@ import com.ecommerce.joias.dto.update.UpdateProductDto;
 import com.ecommerce.joias.entity.Product;
 import com.ecommerce.joias.repository.CategoryRepository;
 import com.ecommerce.joias.repository.ProductRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ProductService {
@@ -77,10 +80,12 @@ public class ProductService {
         );
     }
 
-    public ApiResponse<ProductResponseDto> listProducts() {
-        var products = productRepository.findAll();
+    public ApiResponse<ProductResponseDto> listProducts(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
 
-        var productsDto = products.stream().map(product -> new ProductResponseDto(
+        var pageData = productRepository.findAll(pageable);
+
+        var productsDto = pageData.getContent().stream().map(product -> new ProductResponseDto(
                 product.getProductId(),
                 product.getName(),
                 product.getDescription(),
@@ -91,39 +96,40 @@ public class ProductService {
                 ),
 
                 product.getVariants().stream().map(productVariant -> new ProductVariantResponseDto(
-                        product.getVariants().getFirst().getProductVariantId(),
-                        product.getVariants().getFirst().getSize(),
-                        product.getVariants().getFirst().getSku(),
-                        product.getVariants().getFirst().getPrice(),
-                        product.getVariants().getFirst().getStockQuantity(),
-                        product.getVariants().getFirst().getWeightGrams()
+                        productVariant.getProductVariantId(),
+                        productVariant.getSize(),
+                        productVariant.getSku(),
+                        productVariant.getPrice(),
+                        productVariant.getStockQuantity(),
+                        productVariant.getWeightGrams()
                 )).toList()
-
-
         )).toList();
 
         return new ApiResponse<>(
                 productsDto,
-                productsDto.size()
+                pageData.getTotalElements(),
+                pageData.getTotalPages(),
+                pageData.getNumber(),
+                pageData.getSize()
         );
     }
 
     public void updateProductById(Integer productId, UpdateProductDto updateProductDto) {
         var productEntity = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
 
-        if(updateProductDto.categoryId() != null && updateProductDto.categoryId() != productEntity.getCategory().getCategoryId()){
+        if (updateProductDto.categoryId() != null && updateProductDto.categoryId() != productEntity.getCategory().getCategoryId()) {
             var category = categoryRepository.findById(updateProductDto.categoryId()).orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
 
             productEntity.setCategory(category);
         }
 
-        if(updateProductDto.name() != null)
+        if (updateProductDto.name() != null)
             productEntity.setName(updateProductDto.name());
 
-        if(updateProductDto.description() != null)
+        if (updateProductDto.description() != null)
             productEntity.setDescription(updateProductDto.description());
 
-        if(updateProductDto.material() != null)
+        if (updateProductDto.material() != null)
             productEntity.setMaterial(updateProductDto.material());
 
         productRepository.save(productEntity);

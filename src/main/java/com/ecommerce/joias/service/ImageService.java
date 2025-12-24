@@ -7,6 +7,8 @@ import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.entity.Image;
 import com.ecommerce.joias.repository.ImageRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,11 +82,13 @@ public class ImageService {
         );
     }
 
-    public ApiResponse<ImageResponseDto> listImages() {
-        var imagesEntity = imageRepository.findAll();
+    public ApiResponse<ImageResponseDto> listImages(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
+
+        var pageData = imageRepository.findAll(pageable);
 
         // Converte as entidades para dto
-        var imagesDto = imagesEntity.stream().map(image -> new ImageResponseDto(
+        var imagesDto = pageData.getContent().stream().map(image -> new ImageResponseDto(
                 image.getImageId(),
                 image.getUrl(),
                 image.getPublicId(),
@@ -95,14 +99,19 @@ public class ImageService {
 
         return new ApiResponse<>(
                 imagesDto,
-                imagesDto.size()
+                pageData.getTotalElements(), // Total real no banco
+                pageData.getTotalPages(),    // Total de páginas
+                pageData.getNumber(),        // Página atual
+                pageData.getSize()           // Limite (limit)
         );
     }
 
-    public ApiResponse<ImageResponseDto> findByParentIdAndParentType(Integer parentId, String parentType) {
-        var imagesEntity = imageRepository.findAllByParentIdAndParentType(parentId, parentType);
+    public ApiResponse<ImageResponseDto> findByParentIdAndParentType(Integer parentId, String parentType, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
 
-        var imagesDto = imagesEntity.stream().map(image -> new ImageResponseDto(
+        var pageData = imageRepository.findAllByParentIdAndParentType(parentId, parentType, pageable);
+
+        var imagesDto = pageData.getContent().stream().map(image -> new ImageResponseDto(
                 image.getImageId(),
                 image.getUrl(),
                 image.getPublicId(),
@@ -113,17 +122,20 @@ public class ImageService {
 
         return new ApiResponse<>(
                 imagesDto,
-                imagesDto.size()
+                pageData.getTotalElements(), // Total real no banco
+                pageData.getTotalPages(),    // Total de páginas
+                pageData.getNumber(),        // Página atual
+                pageData.getSize()           // Limite (limit)
         );
     }
 
     @Transactional
-    public void deleteImageById(Integer imageId){
+    public void deleteImageById(Integer imageId) {
         var image = imageRepository.findById(imageId).orElseThrow(() -> new RuntimeException("Imagem não encontrada"));
 
-        try{
+        try {
             cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.emptyMap());
-        } catch (IOException ex){
+        } catch (IOException ex) {
             throw new RuntimeException("Erro ao deletar imagem do Cloudinary", ex);
         }
 

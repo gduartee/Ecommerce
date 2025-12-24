@@ -40,21 +40,27 @@ public class ImageController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<ImageResponseDto>> listImages() {
-        var listImagesDto = imageService.listImages();
+    public ResponseEntity<ApiResponse<ImageResponseDto>> listImages(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit
+    ) {
+        var listImagesDto = imageService.listImages(page, limit);
 
         return ResponseEntity.ok(listImagesDto);
     }
 
     @GetMapping("/{parentId}/{parentType}")
-    public ResponseEntity<ApiResponse<ImageResponseDto>> findByParentIdAndParentType(@PathVariable("parentId") Integer parentId, @PathVariable("parentType") String parentType) {
-        var imagesDto = imageService.findByParentIdAndParentType(parentId, parentType);
+    public ResponseEntity<ApiResponse<ImageResponseDto>> findByParentIdAndParentType(@PathVariable("parentId") Integer parentId, @PathVariable("parentType") String parentType,
+                                                                                     @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                                     @RequestParam(name = "limit", defaultValue = "10") int limit) {
+
+        var imagesDto = imageService.findByParentIdAndParentType(parentId, parentType, page, limit);
 
         return ResponseEntity.ok(imagesDto);
     }
 
     @DeleteMapping("/{imageId}")
-    public ResponseEntity<Void> deleteImageById(@PathVariable("imageId") Integer imageId){
+    public ResponseEntity<Void> deleteImageById(@PathVariable("imageId") Integer imageId) {
         imageService.deleteImageById(imageId);
 
         return ResponseEntity.noContent().build();

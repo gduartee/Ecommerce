@@ -12,6 +12,8 @@ import com.ecommerce.joias.repository.OrderRepository;
 import com.ecommerce.joias.repository.ProductVariantRepository;
 import com.ecommerce.joias.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -97,29 +99,31 @@ public class OrderService {
         );
     }
 
-    public OrderResponseDto getOrderById(Integer orderId){
+    public OrderResponseDto getOrderById(Integer orderId) {
         var orderEntity = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
         return new OrderResponseDto(
-          orderEntity.getOrderId(),
-          orderEntity.getCreatedAt(),
-          orderEntity.getTotalPrice(),
-          orderEntity.getStatus(),
-          orderEntity.getTrackingCode(),
-          orderEntity.getOrderItems().stream().map(orderItem -> new OrderResponseDto.OrderItemResponseDto(
-                  orderItem.getOrderItemId(),
-                  orderItem.getProductVariant().getSku(),
-                  orderItem.getQuantity(),
-                  orderItem.getUnitPrice(),
-                  orderItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()))
-          )).toList()
+                orderEntity.getOrderId(),
+                orderEntity.getCreatedAt(),
+                orderEntity.getTotalPrice(),
+                orderEntity.getStatus(),
+                orderEntity.getTrackingCode(),
+                orderEntity.getOrderItems().stream().map(orderItem -> new OrderResponseDto.OrderItemResponseDto(
+                        orderItem.getOrderItemId(),
+                        orderItem.getProductVariant().getSku(),
+                        orderItem.getQuantity(),
+                        orderItem.getUnitPrice(),
+                        orderItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()))
+                )).toList()
         );
     }
 
-    public ApiResponse<OrderResponseDto> listOrders(){
-        var orders = orderRepository.findAll();
+    public ApiResponse<OrderResponseDto> listOrders(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
 
-        var ordersDto = orders.stream().map(order -> new OrderResponseDto(
+        var pageData = orderRepository.findAll(pageable);
+
+        var ordersDto = pageData.getContent().stream().map(order -> new OrderResponseDto(
                 order.getOrderId(),
                 order.getCreatedAt(),
                 order.getTotalPrice(),
@@ -136,33 +140,36 @@ public class OrderService {
 
         return new ApiResponse<>(
                 ordersDto,
-                ordersDto.size()
+                pageData.getTotalElements(),
+                pageData.getTotalPages(),
+                pageData.getNumber(),
+                pageData.getSize()
         );
     }
 
-    public void updateOrderById(Integer orderId, UpdateOrderDto updateOrderDto){
+    public void updateOrderById(Integer orderId, UpdateOrderDto updateOrderDto) {
         var order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
-        if(updateOrderDto.trackingCode() != null && !updateOrderDto.trackingCode().isBlank())
+        if (updateOrderDto.trackingCode() != null && !updateOrderDto.trackingCode().isBlank())
             order.setTrackingCode(updateOrderDto.trackingCode());
 
-        if(updateOrderDto.status() == OrderStatus.CANCELED && order.getStatus() != OrderStatus.CANCELED)
+        if (updateOrderDto.status() == OrderStatus.CANCELED && order.getStatus() != OrderStatus.CANCELED)
             devolverEstoque(order);
 
-        if(updateOrderDto.status() != null)
+        if (updateOrderDto.status() != null)
             order.setStatus(updateOrderDto.status());
 
         orderRepository.save(order);
     }
 
-    public void deleteOrderById(Integer orderId){
+    public void deleteOrderById(Integer orderId) {
         orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
         orderRepository.deleteById(orderId);
     }
 
-    private void devolverEstoque(Order order){
-        for(OrderItem item : order.getOrderItems()){
+    private void devolverEstoque(Order order) {
+        for (OrderItem item : order.getOrderItems()) {
             var productVariant = item.getProductVariant();
             productVariant.setStockQuantity(productVariant.getStockQuantity() + item.getQuantity());
         }

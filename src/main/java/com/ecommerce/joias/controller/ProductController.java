@@ -37,8 +37,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<ProductResponseDto>> listProducts(){
-        var products = productService.listProducts();
+    public ResponseEntity<ApiResponse<ProductResponseDto>> listProducts(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit
+    ){
+        var products = productService.listProducts(page, limit);
 
         return ResponseEntity.ok(products);
     }

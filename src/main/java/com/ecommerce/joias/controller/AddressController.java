@@ -38,8 +38,11 @@ public class AddressController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<AddressResponseDto>> listAddresses(){
-        var addressesDto = addressService.listAddresses();
+    public ResponseEntity<ApiResponse<AddressResponseDto>> listAddresses(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit
+    ){
+        var addressesDto = addressService.listAddresses(page, limit);
 
         return ResponseEntity.ok(addressesDto);
     }

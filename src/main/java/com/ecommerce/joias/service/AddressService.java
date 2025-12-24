@@ -7,6 +7,8 @@ import com.ecommerce.joias.dto.update.UpdateAddressDto;
 import com.ecommerce.joias.entity.Address;
 import com.ecommerce.joias.repository.AddressRepository;
 import com.ecommerce.joias.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -41,7 +43,7 @@ public class AddressService {
         );
     }
 
-    public AddressResponseDto getAddressById(Integer addressId){
+    public AddressResponseDto getAddressById(Integer addressId) {
         var addressEntity = addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
 
         return new AddressResponseDto(
@@ -52,10 +54,12 @@ public class AddressService {
         );
     }
 
-    public ApiResponse<AddressResponseDto> listAddresses(){
-        var addresses = addressRepository.findAll();
+    public ApiResponse<AddressResponseDto> listAddresses(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit);
 
-        var addressesDto = addresses.stream().map(address -> new AddressResponseDto(
+        var pageData = addressRepository.findAll(pageable);
+
+        var addressesDto = pageData.getContent().stream().map(address -> new AddressResponseDto(
                 address.getAddressId(),
                 address.getCep(),
                 address.getStreet(),
@@ -64,26 +68,29 @@ public class AddressService {
 
         return new ApiResponse<>(
                 addressesDto,
-                addressesDto.size()
+                pageData.getTotalElements(),
+                pageData.getTotalPages(),
+                pageData.getNumber(),
+                pageData.getSize()
         );
     }
 
-    public void updateAddressById(Integer addressId, UpdateAddressDto updateAddressDto){
+    public void updateAddressById(Integer addressId, UpdateAddressDto updateAddressDto) {
         var addressEntity = addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
 
-        if(updateAddressDto.cep() != null)
+        if (updateAddressDto.cep() != null)
             addressEntity.setCep(updateAddressDto.cep());
 
-        if(updateAddressDto.street() != null)
+        if (updateAddressDto.street() != null)
             addressEntity.setStreet(updateAddressDto.street());
 
-        if(updateAddressDto.num() != null)
+        if (updateAddressDto.num() != null)
             addressEntity.setNum(updateAddressDto.num());
 
         addressRepository.save(addressEntity);
     }
 
-    public void deleteAddressById(Integer addressId){
+    public void deleteAddressById(Integer addressId) {
         addressRepository.findById(addressId).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
 
         addressRepository.deleteById(addressId);
