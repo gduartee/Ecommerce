@@ -4,7 +4,7 @@ import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.create.CreateCategoryDto;
 import com.ecommerce.joias.dto.response.CategoryResponseDto;
 import com.ecommerce.joias.dto.response.ProductShortResponseDto;
-import com.ecommerce.joias.dto.response.SubCategoriesResponseDto;
+import com.ecommerce.joias.dto.response.SubcategoryResponseDto;
 import com.ecommerce.joias.dto.update.UpdateCategoryDto;
 import com.ecommerce.joias.entity.Category;
 import com.ecommerce.joias.repository.CategoryRepository;
@@ -28,11 +28,6 @@ public class CategoryService {
         var categoryEntity = new Category();
         categoryEntity.setName(createCategoryDto.name());
 
-        if (createCategoryDto.parentId() != null) {
-            var parent = categoryRepository.findById(createCategoryDto.parentId()).orElseThrow(() -> new RuntimeException("Categoria pai não encontrada"));
-
-            parent.addSubCategory(categoryEntity);
-        }
 
         return categoryRepository.save(categoryEntity);
     }
@@ -48,8 +43,8 @@ public class CategoryService {
                         product.getName(),
                         product.getDescription()
                 )).toList(),
-                category.getSubCategories().stream().map(subCategory -> new SubCategoriesResponseDto(
-                        subCategory.getCategoryId(),
+                category.getSubcategories().stream().map(subCategory -> new SubcategoryResponseDto(
+                        subCategory.getSubcategoryId(),
                         subCategory.getName()
                 )).toList()
         );
@@ -75,8 +70,8 @@ public class CategoryService {
                                         product.getDescription()
                                 )
                         ).toList(),
-                        category.getSubCategories().stream().map(subCategory -> new SubCategoriesResponseDto(
-                                subCategory.getCategoryId(),
+                        category.getSubcategories().stream().map(subCategory -> new SubcategoryResponseDto(
+                                subCategory.getSubcategoryId(),
                                 subCategory.getName()
                         )).toList()
                 )
@@ -97,22 +92,6 @@ public class CategoryService {
         if (updateCategoryDto.name() != null)
             categoryEntity.setName(updateCategoryDto.name());
 
-        if (updateCategoryDto.parentId() != null) {
-            // Garante que o id da categoria pai realmente mudou
-            if (categoryEntity.getParent() == null || !categoryEntity.getParent().getCategoryId().equals(updateCategoryDto.parentId())) {
-                var newParent = categoryRepository.findById(updateCategoryDto.parentId()).orElseThrow(() -> new RuntimeException("Nova categoria pai não encontrada."));
-
-                // Evitar que uma categoria seja pai dela mesma
-                if (newParent.getCategoryId().equals(categoryId))
-                    throw new RuntimeException("Uma categoria não pode ser pai dela mesma.");
-
-                categoryEntity.setParent(newParent);
-            }
-        } else {
-            // Se enviou null, significa que virou categoria raiz
-            categoryEntity.setParent(null);
-        }
-
         categoryRepository.save(categoryEntity);
     }
 
@@ -122,10 +101,6 @@ public class CategoryService {
         // Se a lista de produtos não estiver vazia, proíbe a deleção
         if (!categoryEntity.getProducts().isEmpty())
             throw new RuntimeException("Não é possível deletar esta categoria pois existem produtos vinculados a ela.");
-
-        // Se a lista de subCategorias não estiver vazia, proíbe a deleção
-        if (!categoryEntity.getSubCategories().isEmpty())
-            throw new RuntimeException("Não é possível deletar pois existem subcategorias vinculadas.");
 
         categoryRepository.deleteById(categoryId);
     }

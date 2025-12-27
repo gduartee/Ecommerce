@@ -6,6 +6,6 @@ public record CategoryResponseDto(
         Integer categoryId,
         String name,
         List<ProductShortResponseDto> products,
-        List<SubCategoriesResponseDto> subCategories
+        List<SubcategoryResponseDto> subCategories
 ) {
 }

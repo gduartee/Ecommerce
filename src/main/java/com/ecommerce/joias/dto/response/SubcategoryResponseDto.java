@@ -1,6 +1,6 @@
 package com.ecommerce.joias.dto.response;
 
-public record SubCategoriesResponseDto(
+public record SubcategoryResponseDto(
         Integer subCategoryId,
         String name
 ) {
