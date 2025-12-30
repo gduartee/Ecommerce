@@ -9,7 +9,8 @@ public record ProductResponseDto(
         String material,
         Boolean featured,
         SubcategoryInfo subcategory,
-        List<ProductVariantResponseDto> productVariants
+        List<ProductVariantResponseDto> productVariants,
+        List<ImageResponseDto> images
 ) {
     public record SubcategoryInfo(
             Integer subcategoryId,

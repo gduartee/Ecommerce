@@ -1,6 +1,7 @@
 package com.ecommerce.joias.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,11 @@ public class Product {
 
     @Column(name = "featured", nullable = false)
     private boolean featured = false;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", referencedColumnName = "productId", insertable = false, updatable = false)
+    @SQLRestriction("parent_type = 'product'")
+    private List<Image> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariant> variants = new ArrayList<>();
@@ -82,11 +88,11 @@ public class Product {
         this.material = material;
     }
 
-    public Boolean getFeatured() {
+    public boolean getFeatured() {
         return featured;
     }
 
-    public void setFeatured(Boolean featured) {
+    public void setFeatured(boolean featured) {
         this.featured = featured;
     }
 
@@ -98,9 +104,17 @@ public class Product {
         this.variants = variants;
     }
 
-    public void addVariant(ProductVariant productVariant){
+    public void addVariant(ProductVariant productVariant) {
         this.variants.add(productVariant);
 
         productVariant.setProduct(this);
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 }

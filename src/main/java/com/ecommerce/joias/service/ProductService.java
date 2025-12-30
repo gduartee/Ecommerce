@@ -2,9 +2,11 @@ package com.ecommerce.joias.service;
 
 import com.ecommerce.joias.dto.create.CreateProductDto;
 import com.ecommerce.joias.dto.response.ApiResponse;
+import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.dto.response.ProductResponseDto;
 import com.ecommerce.joias.dto.response.ProductVariantResponseDto;
 import com.ecommerce.joias.dto.update.UpdateProductDto;
+import com.ecommerce.joias.entity.Image;
 import com.ecommerce.joias.entity.Product;
 import com.ecommerce.joias.repository.CategoryRepository;
 import com.ecommerce.joias.repository.ProductRepository;
@@ -52,6 +54,7 @@ public class ProductService {
                 productSaved.getMaterial(),
                 productSaved.getFeatured(),
                 subcategoryInfo,
+                java.util.List.of(),
                 java.util.List.of()
         );
     }
@@ -69,6 +72,15 @@ public class ProductService {
                         variant.getWeightGrams()
                 )).toList();
 
+        var productImagesDto = product.getImages().stream().map(image -> new ImageResponseDto(
+                image.getImageId(),
+                image.getUrl(),
+                image.getPublicId(),
+                image.getParentId(),
+                image.getParentType(),
+                image.getMain()
+        )).toList();
+
         var categoryInfo = new ProductResponseDto.SubcategoryInfo(
                 product.getSubcategory().getSubcategoryId(),
                 product.getSubcategory().getName()
@@ -81,7 +93,8 @@ public class ProductService {
                 product.getMaterial(),
                 product.getFeatured(),
                 categoryInfo,
-                productVariantsDto
+                productVariantsDto,
+                productImagesDto
         );
     }
 
@@ -100,6 +113,7 @@ public class ProductService {
                 product.getDescription(),
                 product.getMaterial(),
                 product.getFeatured(),
+
                 new ProductResponseDto.SubcategoryInfo(
                         product.getSubcategory().getSubcategoryId(),
                         product.getSubcategory().getName()
@@ -112,7 +126,16 @@ public class ProductService {
                         productVariant.getPrice(),
                         productVariant.getStockQuantity(),
                         productVariant.getWeightGrams()
-                )).toList()
+                )).toList(),
+
+               product.getImages().stream().filter(Image::getMain).findFirst().map(img -> new ImageResponseDto(
+                       img.getImageId(),
+                       img.getUrl(),
+                       img.getPublicId(),
+                       img.getParentId(),
+                       img.getParentType(),
+                       img.getMain()
+               )).stream().toList()
         )).toList();
 
         return new ApiResponse<>(
