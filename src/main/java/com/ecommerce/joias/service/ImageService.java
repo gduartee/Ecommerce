@@ -6,6 +6,7 @@ import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.entity.Image;
 import com.ecommerce.joias.repository.ImageRepository;
+import com.ecommerce.joias.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,15 +22,40 @@ public class ImageService {
 
     private final Cloudinary cloudinary;
     private final ImageRepository imageRepository;
+    private final ProductRepository productRepository;
 
-    public ImageService(Cloudinary cloudinary, ImageRepository imageRepository) {
+    public ImageService(Cloudinary cloudinary, ImageRepository imageRepository, ProductRepository productRepository) {
         this.cloudinary = cloudinary;
         this.imageRepository = imageRepository;
+        this.productRepository = productRepository;
+    }
+
+    // Metodo auxiliar
+    private void validateParentExistence(Integer parentId, String parentType) {
+        boolean exists = false;
+
+        switch (parentType) {
+            case "PRODUCT":
+                exists = productRepository.existsById(parentId);
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de entidade inválido: " + parentType);
+        }
+
+        if (!exists)
+            // Se não existir vai lançar erro 404
+            throw new RuntimeException("Não foi encontrado nenhum " + parentType + " com ID " + parentId);
     }
 
     @Transactional
     public ImageResponseDto uploadImage(MultipartFile file, Integer parentId, String parentType, Boolean isMain) {
         try {
+            // Padroniza o parentType, transforma em letra maiúscula
+            String typeNormalized = parentType.toUpperCase();
+
+            // Valida, verifica se existe o parentType com id parentId correspondente
+            validateParentExistence(parentId, typeNormalized);
+
             String fileName = parentType + "_" + parentId + "_" + UUID.randomUUID();
 
             // Configurações do Upload
@@ -48,7 +74,7 @@ public class ImageService {
             // DTO -> ENTITY
             Image imageEntity = new Image();
             imageEntity.setParentId(parentId);
-            imageEntity.setParentType(parentType);
+            imageEntity.setParentType(typeNormalized);
             imageEntity.setUrl(url);
             imageEntity.setPublicId(publicId);
             imageEntity.setMain(isMain);
