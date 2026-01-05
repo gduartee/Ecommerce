@@ -49,7 +49,7 @@ public class ImageController {
         return ResponseEntity.ok(listImagesDto);
     }
 
-    @GetMapping("/{parentId}/{parentType}")
+    @GetMapping("/{parentType}/{parentId}")
     public ResponseEntity<ApiResponse<ImageResponseDto>> findByParentIdAndParentType(@PathVariable("parentId") Integer parentId, @PathVariable("parentType") String parentType,
                                                                                      @RequestParam(name = "page", defaultValue = "0") int page,
                                                                                      @RequestParam(name = "limit", defaultValue = "10") int limit) {

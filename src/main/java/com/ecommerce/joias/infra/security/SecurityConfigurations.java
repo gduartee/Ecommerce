@@ -48,7 +48,7 @@ public class SecurityConfigurations {
                         // 2. ROTAS ADMINISTRATIVAS (Gestão da Loja)
                         // --------------------------------------------------------
                         // Mexer no Catálogo (Criar/Editar/Deletar) -> Só ADMIN ou MANAGER
-                        .requestMatchers(HttpMethod.POST, "/products/**", "/categories/**", "/subcategories/**", "/variants/**").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/products/**", "/categories/**", "/subcategories/**", "/variants/**", "/images/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/products/**", "/categories/**", "/subcategories/**", "/variants/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/products/**", "/categories/**", "/subcategories/**", "/variants/**").hasRole("MANAGER")
 
