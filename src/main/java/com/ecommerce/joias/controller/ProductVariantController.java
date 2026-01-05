@@ -25,7 +25,7 @@ public class ProductVariantController {
     public ResponseEntity<ProductVariantResponseDto> createProduct(@RequestBody @Valid CreateProductVariantDto createProductVariantDto) {
         var productVariantCreated = productVariantService.createProductVariant(createProductVariantDto);
 
-        URI location = URI.create("/products/variants/" + productVariantCreated.productVariantId());
+        URI location = URI.create("/variants/" + productVariantCreated.productVariantId());
 
         return ResponseEntity.created(location).body(productVariantCreated);
     }

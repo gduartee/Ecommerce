@@ -51,6 +51,11 @@ public class CategoryService {
     }
 
     public ApiResponse<CategoryResponseDto> listCategories(Integer page, Integer limit, String name) {
+        // Tratamento defensivo
+        int pageNumber = (page != null && page >= 0) ? page : 0;
+
+        int pageSize = (limit != null & limit > 0) ? limit : 10;
+
         Pageable pageable = PageRequest.of(page, limit);
         Page<Category> pageData;
 
