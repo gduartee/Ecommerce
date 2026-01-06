@@ -41,6 +41,9 @@ public class ImageService {
             case "PRODUCT":
                 exists = productRepository.existsById(parentId);
                 break;
+            case "EMPLOYEE":
+                exists = employeeRepository.existsById(parentId);
+                break;
             default:
                 throw new IllegalArgumentException("Tipo de entidade inválido: " + parentType);
         }
