@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.entity.Image;
+import com.ecommerce.joias.repository.EmployeeRepository;
 import com.ecommerce.joias.repository.ImageRepository;
 import com.ecommerce.joias.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -23,11 +24,13 @@ public class ImageService {
     private final Cloudinary cloudinary;
     private final ImageRepository imageRepository;
     private final ProductRepository productRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public ImageService(Cloudinary cloudinary, ImageRepository imageRepository, ProductRepository productRepository) {
+    public ImageService(Cloudinary cloudinary, ImageRepository imageRepository, ProductRepository productRepository, EmployeeRepository employeeRepository) {
         this.cloudinary = cloudinary;
         this.imageRepository = imageRepository;
         this.productRepository = productRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     // Metodo auxiliar

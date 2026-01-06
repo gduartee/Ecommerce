@@ -30,7 +30,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{employeeId}")
-    public ResponseEntity<Employee> getEmployeeById(@PathVariable("employeeId") Integer employeeId){
+    public ResponseEntity<EmployeeResponseDto> getEmployeeById(@PathVariable("employeeId") Integer employeeId){
         var employee = employeeService.getEmployeeById(employeeId);
 
         return ResponseEntity.ok(employee);

@@ -1,10 +1,12 @@
 package com.ecommerce.joias.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,6 +29,11 @@ public class Employee implements UserDetails {
 
     @Column(name = "role")
     private String role;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "parent_id", referencedColumnName = "employeeId", insertable = false, updatable = false)
+    @SQLRestriction("parent_type = 'employee'")
+    private List<Image> images = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -112,4 +119,11 @@ public class Employee implements UserDetails {
         this.role = role;
     }
 
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 }

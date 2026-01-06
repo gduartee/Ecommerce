@@ -3,6 +3,7 @@ package com.ecommerce.joias.service;
 import com.ecommerce.joias.dto.create.CreateEmployeeDto;
 import com.ecommerce.joias.dto.response.ApiResponse;
 import com.ecommerce.joias.dto.response.EmployeeResponseDto;
+import com.ecommerce.joias.dto.response.ImageResponseDto;
 import com.ecommerce.joias.dto.update.UpdateEmployeeDto;
 import com.ecommerce.joias.entity.Employee;
 import com.ecommerce.joias.repository.EmployeeRepository;
@@ -42,8 +43,24 @@ public class EmployeeService {
         return employeeSaved.getEmployeeId();
     }
 
-    public Employee getEmployeeById(Integer employeeId){
-        return employeeRepository.findById(employeeId).orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
+    public EmployeeResponseDto getEmployeeById(Integer employeeId){
+        var employeeEntity = employeeRepository.findById(employeeId).orElseThrow(() -> new RuntimeException("Funcionário não encontrado"));
+
+        return new EmployeeResponseDto(
+                employeeEntity.getEmployeeId(),
+                employeeEntity.getName(),
+                employeeEntity.getEmail(),
+                employeeEntity.getPassword(),
+                employeeEntity.getRole(),
+                employeeEntity.getImages().stream().map(image -> new ImageResponseDto(
+                        image.getImageId(),
+                        image.getUrl(),
+                        image.getPublicId(),
+                        image.getParentId(),
+                        image.getParentType(),
+                        image.isMain()
+                )).toList()
+        );
     }
 
     public ApiResponse<EmployeeResponseDto> listEmployees(Integer page, Integer limit, String name){
@@ -60,7 +77,15 @@ public class EmployeeService {
                 employee.getName(),
                 employee.getEmail(),
                 employee.getPassword(),
-                employee.getRole()
+                employee.getRole(),
+                employee.getImages().stream().map(image -> new ImageResponseDto(
+                        image.getImageId(),
+                        image.getUrl(),
+                        image.getPublicId(),
+                        image.getParentId(),
+                        image.getParentType(),
+                        image.isMain()
+                )).toList()
         )).toList();
 
         return new ApiResponse<>(
